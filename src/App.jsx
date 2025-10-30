@@ -5,6 +5,8 @@ import Home from './pages/home';
 import "./App.scss"
 import ProductListing from './components/productlisting';
 import ProductDetails from './pages/productdetails';
+import Login from './pages/login';
+import Register from './pages/register';
 
 function App() {
   
@@ -17,6 +19,8 @@ function App() {
           <Route path={"/"} exact={true} element={<Home/>} />
           <Route path={"/productlisting"} exact={true} element={<ProductListing/>} />
           <Route path={"/product/:id"} exact={true} element={<ProductDetails/>} />
+          <Route path={"/login"} exact={true} element={<Login/>} />
+          <Route path={"/register"} exact={true} element={<Register/>} />
           
        </Routes>
        <Footer/>
