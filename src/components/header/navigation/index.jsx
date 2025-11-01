@@ -25,7 +25,7 @@ const Navigation = () => {
           <div className="cont2">
             <ul>
               <li><Link to="/">Accueil</Link></li>
-              <li><Link to="/">Boutique</Link></li>
+              <li><Link to="/productlisting">Boutique</Link></li>
               <li><Link to="/">À propos de nous</Link></li>
               <li><Link to="/">Nous contacter</Link></li>
             </ul>
