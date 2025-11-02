@@ -12,6 +12,7 @@ import Verify from './pages/verify';
 import ForgotPassword from './pages/forgotpassword';
 import ResetPassword from './pages/resetpassword';
 import Checkout from './pages/checkout';
+import MyAccount from './pages/myaccount';
 
 function App() {
   
@@ -31,6 +32,7 @@ function App() {
           <Route path={"/forgotpassword"} exact={true} element={<ForgotPassword/>} />
           <Route path={"/resetpassword"} exact={true} element={<ResetPassword/>} />
           <Route path={"/checkout"} exact={true} element={<Checkout/>} />
+          <Route path={"/account"} exact={true} element={<MyAccount/>} />
           
        </Routes>
        <Footer/>

@@ -1,12 +1,21 @@
-import React, { useState } from 'react'; // <-- ajoute useState ici
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Search from '../search';
-import { FaHeart, FaShoppingCart, FaBalanceScale } from "react-icons/fa";
 import Navigation from './navigation';
 import CartPanel from '../cartpanel';
+import {
+  FaHeart,
+  FaShoppingCart,
+  FaBalanceScale,
+  FaUser,
+  FaBoxOpen,
+  FaSignOutAlt,
+} from "react-icons/fa";
+
 
 const Header = () => {
   const [cartOpen, setCartOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const cartItems = [
     { image: "/od11.jpg",name: "Produit 1", quantity: 2, price: 1500 },
@@ -22,12 +31,12 @@ const Header = () => {
 
   const toggleCart = () => setCartOpen(!cartOpen);
 
-  return (
+   return (
     <header>
       <div className="top-strip">
         <div className="container">
           <div className="cont1">
-            <p>Obtenez 25%, de reduction sur vos achat de cette semaine !!!</p>
+            <p>Obtenez 25% de réduction sur vos achats cette semaine !!!</p>
           </div>
           <div className="cont2">
             <ul>
@@ -37,17 +46,52 @@ const Header = () => {
           </div>
         </div>
       </div>
+
       <div className="header">
         <div className="container">
           <div className="cont1">
-            <Link to={"/"}><img src="/logo.png" alt="" /></Link>
+            <Link to={"/"}><img src="/logo.png" alt="logo" /></Link>
           </div>
+
           <div className="cont2">
-            <Search/>
+            <Search />
           </div>
+
           <div className="cont3">
             <ul>
-              <li><Link className='lien' to={"Login"}>Connexion</Link> | <Link className='lien' to={"Register"}>Enregistrement</Link></li>
+              {/* 🔽 Bloc utilisateur amélioré */}
+              <li className="user-menu">
+                <div className="user-info" onClick={() => setDropdownOpen(!dropdownOpen)}>
+                  <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRCzK6DKnIE7MM_7cuaQAJlpxUHYs8yKDT3yg&s" alt="User" className="user-avatar" />
+                  <div className="user-details">
+                    <span className="user-name">John Doe</span>
+                    <span className="user-email">john@example.com</span>
+                  </div>
+                </div>
+
+                {dropdownOpen && (
+                  <ul className="dropdown-menu">
+                    <li>
+                      <FaUser className="icon" />
+                      <Link to="/account">Mon compte</Link>
+                    </li>
+                    <li>
+                      <FaBoxOpen className="icon" />
+                      <Link to="/orders">Mes commandes</Link>
+                    </li>
+                    <li>
+                      <FaHeart className="icon" />
+                      <Link to="/wishlist">Ma liste</Link>
+                    </li>
+                    <li>
+                      <FaSignOutAlt className="icon" />
+                      <Link to="/logout">Déconnexion</Link>
+                    </li>
+                  </ul>
+                )}
+
+              </li>
+
               <li className="iconBox">
                 <FaHeart className="icon" />
                 <span className="count">3</span>
@@ -58,7 +102,7 @@ const Header = () => {
                 <span className="count">2</span>
                 <span className="tooltip">Comparer</span>
               </li>
-              <li className="iconBox" onClick={toggleCart} style={{ cursor: "pointer" }}>
+              <li className="iconBox" onClick={toggleCart}>
                 <FaShoppingCart className="icon" />
                 <span className="count">{cartItems.length}</span>
                 <span className="tooltip">Panier</span>
@@ -67,10 +111,11 @@ const Header = () => {
           </div>
         </div>
       </div>
-      <Navigation/>
+
+      <Navigation />
       <CartPanel isOpen={cartOpen} onClose={toggleCart} cartItems={cartItems} />
     </header>
   );
-}
+};
 
 export default Header;
