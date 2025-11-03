@@ -9,6 +9,7 @@ import {
 import "./myaccount.scss";
 import "./profiletab.scss";
 import WishlistTabPage from "../wishlisttab";
+import OrdersTabPage from "./orderstabpage";
 
 
 const MyAccount = () => {
@@ -101,7 +102,7 @@ const MyAccount = () => {
         return (
           <div className="tab-content">
             <h2>Mes Commandes</h2>
-            <p>Vous n’avez pas encore passé de commande.</p>
+            <OrdersTabPage/>
           </div>
         );
       case "wishlist":
