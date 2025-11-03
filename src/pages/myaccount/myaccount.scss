@@ -1,19 +1,22 @@
 .account-layout {
   display: flex;
-  min-height: 100vh;
-  background: #f8f9fb;
+  min-height: 75vh;
   font-family: "Poppins", sans-serif;
+ 
 
   /* ===== SIDEBAR ===== */
   .sidebar {
     width: 260px;
     background: #fff;
     border-right: 1px solid #eee;
+    border-radius: 10px;
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 2rem 1rem;
     box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+    margin: 30px 0 30px 30px;
+
 
     .user-info {
       text-align: center;
@@ -45,46 +48,50 @@
       width: 100%;
 
       li {
-        position: relative;
-        padding: 0.8rem 1rem;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        color: #333;
+        width: 100%;
 
-        .marker {
-          position: absolute;
-          left: 0;
-          width: 4px;
-          height: 100%;
-          background: transparent;
-          border-radius: 0 3px 3px 0;
-          transition: all 0.3s ease;
-        }
-
-        .menu-item {
+        .menu-link {
+          position: relative;
           display: flex;
           align-items: center;
           gap: 10px;
-
-          .icon {
-            font-size: 1.1rem;
-            color: #e63946;
-          }
-        }
-
-        &:hover {
-          background: rgba(230, 57, 70, 0.08);
-        }
-
-        &.active {
-          background: rgba(230, 57, 70, 0.12);
-          font-weight: 600;
+          padding: 0.8rem 1rem;
+          color: #333;
+          text-decoration: none;
+          transition: all 0.3s ease;
 
           .marker {
-            background: #e63946;
+            position: absolute;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: transparent;
+            border-radius: 0 3px 3px 0;
+            transition: all 0.3s ease;
+          }
+
+          .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+
+            .icon {
+              font-size: 1.1rem;
+              color: #e63946;
+            }
+          }
+
+          &:hover {
+            background: rgba(230, 57, 70, 0.08);
+          }
+
+          &.active {
+            background: rgba(230, 57, 70, 0.12);
+            font-weight: 600;
+
+            .marker {
+              background: #e63946;
+            }
           }
         }
       }
@@ -142,9 +149,12 @@
         gap: 1rem;
 
         li {
-          padding: 0.5rem;
-          .marker {
-            display: none;
+          width: auto;
+          .menu-link {
+            padding: 0.5rem;
+            .marker {
+              display: none;
+            }
           }
         }
       }
@@ -155,5 +165,3 @@
     }
   }
 }
-
-

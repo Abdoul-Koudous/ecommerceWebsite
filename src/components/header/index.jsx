@@ -73,22 +73,23 @@ const Header = () => {
                   <ul className="dropdown-menu">
                     <li>
                       <FaUser className="icon" />
-                      <Link to="/account">Mon compte</Link>
+                      <Link to="/account/profile">Mon compte</Link>
                     </li>
                     <li>
                       <FaBoxOpen className="icon" />
-                      <Link to="/orders">Mes commandes</Link>
+                      <Link to="/account/orders">Mes commandes</Link>
                     </li>
                     <li>
                       <FaHeart className="icon" />
-                      <Link to="/wishlist">Ma liste</Link>
+                      <Link to="/account/wishlist">Ma liste</Link>
                     </li>
                     <li>
                       <FaSignOutAlt className="icon" />
-                      <Link to="/logout">Déconnexion</Link>
+                      <Link to="/account/logout">Déconnexion</Link>
                     </li>
                   </ul>
                 )}
+
 
               </li>
 

@@ -8,8 +8,8 @@ import {
 } from "react-icons/fa";
 import "./myaccount.scss";
 import "./profiletab.scss";
-import WishlistTabPage from "../wishlisttab";
-import OrdersTabPage from "./orderstabpage";
+import WishlistTabPage from "../../wishlisttab";
+import OrdersTabPage from "../orderstabpage";
 
 
 const MyAccount = () => {
