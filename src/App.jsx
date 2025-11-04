@@ -1,9 +1,11 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import "./App.scss";
 
+// === Layouts ===
+import MainLayout from "./layouts/mainlayout";
+import AdminLayout from "./layouts/adminlayout";
 
-
-// Pages
+// === Pages Client ===
 import Home from "./pages/home";
 import ProductListing from "./components/productlisting";
 import ProductDetails from "./pages/productdetails";
@@ -15,7 +17,7 @@ import ForgotPassword from "./pages/forgotpassword";
 import ResetPassword from "./pages/resetpassword";
 import Checkout from "./pages/checkout";
 
-// Account
+// === Compte client ===
 import AccountLayout from "./pages/myaccount/AccountLayout";
 import ProfilePage from "./pages/myaccount/profilePage";
 import OrdersPage from "./pages/myaccount/orderspage";
@@ -23,126 +25,43 @@ import WishlistPage from "./pages/myaccount/wishlistpage";
 import SettingsPage from "./pages/myaccount/settingspage";
 import LogoutPage from "./pages/myaccount/logoutpage";
 
-// Admin
+// === Admin ===
 import Dashboard from "./pages/admin/Dashboard";
-
-
-// Layouts
-import AdminLayout from "./layouts/adminlayout";
-import MainLayout from "./layouts/mainlayout";
+// (tu pourras ajouter plus tard : Products, Orders, Users, Settings, etc.)
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* === CLIENT ROUTES === */}
-        <Route
-          path="/"
-          element={
-            <MainLayout>
-              <Home />
-            </MainLayout>
-          }
-        />
-        <Route
-          path="/productlisting"
-          element={
-            <MainLayout>
-              <ProductListing />
-            </MainLayout>
-          }
-        />
-        <Route
-          path="/product/:id"
-          element={
-            <MainLayout>
-              <ProductDetails />
-            </MainLayout>
-          }
-        />
-        <Route
-          path="/login"
-          element={
-            <MainLayout>
-              <Login />
-            </MainLayout>
-          }
-        />
-        <Route
-          path="/register"
-          element={
-            <MainLayout>
-              <Register />
-            </MainLayout>
-          }
-        />
-        <Route
-          path="/cart"
-          element={
-            <MainLayout>
-              <CartPage />
-            </MainLayout>
-          }
-        />
-        <Route
-          path="/verify"
-          element={
-            <MainLayout>
-              <Verify />
-            </MainLayout>
-          }
-        />
-        <Route
-          path="/forgotpassword"
-          element={
-            <MainLayout>
-              <ForgotPassword />
-            </MainLayout>
-          }
-        />
-        <Route
-          path="/resetpassword"
-          element={
-            <MainLayout>
-              <ResetPassword />
-            </MainLayout>
-          }
-        />
-        <Route
-          path="/checkout"
-          element={
-            <MainLayout>
-              <Checkout />
-            </MainLayout>
-          }
-        />
+        {/* === FRONT CLIENT === */}
+        <Route element={<MainLayout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/productlisting" element={<ProductListing />} />
+          <Route path="/product/:id" element={<ProductDetails />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/cart" element={<CartPage />} />
+          <Route path="/verify" element={<Verify />} />
+          <Route path="/forgotpassword" element={<ForgotPassword />} />
+          <Route path="/resetpassword" element={<ResetPassword />} />
+          <Route path="/checkout" element={<Checkout />} />
 
-        {/* === COMPTE CLIENT === */}
-        <Route
-          path="/account"
-          element={
-            <MainLayout>
-              <AccountLayout />
-            </MainLayout>
-          }
-        >
-          <Route index element={<Navigate to="profile" />} />
-          <Route path="profile" element={<ProfilePage />} />
-          <Route path="orders" element={<OrdersPage />} />
-          <Route path="wishlist" element={<WishlistPage />} />
-          <Route path="settings" element={<SettingsPage />} />
-          <Route path="logout" element={<LogoutPage />} />
+          {/* === COMPTE UTILISATEUR === */}
+          <Route path="/account" element={<AccountLayout />}>
+            <Route index element={<Navigate to="profile" />} />
+            <Route path="profile" element={<ProfilePage />} />
+            <Route path="orders" element={<OrdersPage />} />
+            <Route path="wishlist" element={<WishlistPage />} />
+            <Route path="settings" element={<SettingsPage />} />
+            <Route path="logout" element={<LogoutPage />} />
+          </Route>
         </Route>
 
         {/* === ADMIN === */}
-        <Route
-          path="/admin/dashboard"
-          element={
-            <AdminLayout>
-              <Dashboard />
-            </AdminLayout>
-          }
-        />
+        <Route element={<AdminLayout />}>
+          <Route path="/admin/dashboard" element={<Dashboard />} />
+          {/* tu pourras ajouter d’autres pages admin ici */}
+        </Route>
       </Routes>
     </BrowserRouter>
   );

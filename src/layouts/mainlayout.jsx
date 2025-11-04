@@ -1,14 +1,15 @@
-// src/layouts/MainLayout.jsx
+// layouts/MainLayout.jsx
 import React from "react";
+import { Outlet } from "react-router-dom";
 import Header from "../components/header";
 import Footer from "../components/footer";
 
-const MainLayout = ({ children }) => {
+const MainLayout = () => {
   return (
     <>
-      <Header />
-      {children}
-      <Footer />
+      <Header/>
+      <Outlet />
+      <Footer/>
     </>
   );
 };
