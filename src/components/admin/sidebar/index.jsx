@@ -97,11 +97,14 @@ const AdminSidebar = () => {
               ) : (
                 <NavLink
                   to={link.to}
-                  className={({ isActive }) => (isActive ? "active" : "")}
+                  className={({ isActive }) => (isActive ? "active menu-link" : "menu-link")}
                 >
-                  <span className="icon">{link.icon}</span>
-                  <span className="label">{link.label}</span>
+                  <div className="menu-left">
+                    <span className="icon">{link.icon}</span>
+                    <span className="label">{link.label}</span>
+                  </div>
                 </NavLink>
+
               )}
             </li>
           ))}
