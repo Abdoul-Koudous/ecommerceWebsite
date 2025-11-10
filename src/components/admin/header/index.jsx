@@ -5,11 +5,11 @@ import {
   RiSettings3Line,
   RiGlobeLine,
 } from "react-icons/ri";
-import { IoMdLogOut } from "react-icons/io"; // ✅ Import correct
+import { IoMdLogOut } from "react-icons/io";
 import { FaUserCircle } from "react-icons/fa";
 import "./adminheader.scss";
 
-const AdminHeader = () => {
+const AdminHeader = ({ onToggleSidebar }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef(null);
 
@@ -34,16 +34,14 @@ const AdminHeader = () => {
 
   return (
     <header className="admin-header">
-      {/* Partie gauche : menu burger */}
       <div className="part1">
-        <button className="menu-btn">
+        {/* 👇 quand on clique ici, on réduit la sidebar */}
+        <button className="menu-btn" onClick={onToggleSidebar}>
           <RiMenu2Line />
         </button>
       </div>
 
-      {/* Partie droite */}
       <div className="part2">
-        {/* Notification */}
         <div className="icon-wrapper badge">
           <RiNotification3Line className="icon" />
           <span className="badge-number">
@@ -51,17 +49,14 @@ const AdminHeader = () => {
           </span>
         </div>
 
-        {/* Paramètres */}
         <div className="icon-wrapper">
           <RiSettings3Line className="icon" />
         </div>
 
-        {/* Langue */}
         <div className="icon-wrapper">
           <RiGlobeLine className="icon" />
         </div>
 
-        {/* Menu utilisateur */}
         <div className="user-menu" ref={menuRef}>
           <div
             className="user-profile"
@@ -72,7 +67,6 @@ const AdminHeader = () => {
 
           {isMenuOpen && (
             <div className="dropdown-menu">
-              {/* === Profil Header === */}
               <div className="profile-header">
                 <img src={user.avatar} alt="User" className="avatar" />
                 <div className="info">
@@ -81,17 +75,10 @@ const AdminHeader = () => {
                 </div>
               </div>
 
-              {/* === Menu Items === */}
               <ul className="menu-items">
-                <li>
-                  <FaUserCircle className="icon" /> Mon compte
-                </li>
-                <li>
-                  <RiSettings3Line className="icon" /> Paramètres
-                </li>
-                <li className="logout">
-                  <IoMdLogOut className="icon" /> Déconnexion
-                </li>
+                <li><FaUserCircle className="icon" /> Mon compte</li>
+                <li><RiSettings3Line className="icon" /> Paramètres</li>
+                <li className="logout"><IoMdLogOut className="icon" /> Déconnexion</li>
               </ul>
             </div>
           )}

@@ -2,15 +2,16 @@ import React from "react";
 import "./dashboard.scss";
 import DashboardBoxe from "../../../components/admin/dashboardboxes";
 import OrdersTabPage from "../../myaccount/orderstabpage";
+import ProductTable from "../../../components/admin/producrttable1/producttable";
+import GraphStats from "../../../components/admin/graph1/graphstats";
 
 const Dashboard = () => {
-  const adminName = "Abdoul-Koudous"; // pourra venir d’un contexte ou API plus tard
+  const adminName = "Abdoul-Koudous";
 
   return (
     <div className="dashboard">
       {/* ====== SECTION D’EN-TÊTE ====== */}
       <div className="dashboard-header">
-        {/* Partie gauche */}
         <div className="left">
           <h2>
             Bonjour, bienvenue <span>{adminName}</span> 👋
@@ -22,7 +23,6 @@ const Dashboard = () => {
           <button className="add-btn">+ Ajouter un produit</button>
         </div>
 
-        {/* Partie droite */}
         <div className="right">
           <img
             src="https://cdn-icons-png.flaticon.com/512/2331/2331966.png"
@@ -31,12 +31,22 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* ====== LES CARTES STATISTIQUES ====== */}
+      {/* ====== CARTES STATISTIQUES ====== */}
       <DashboardBoxe />
+
+      {/* ====== TABLE PRODUITS ====== */}
+      <ProductTable />
+
+
+      {/* ====== COMMANDES ====== */}
       <div className="recentOrder">
-        <h2>Commandes Recents</h2>
-        <OrdersTabPage/>
+        <h2>Commandes récentes</h2>
+        <OrdersTabPage />
       </div>
+
+      
+      {/* ====== GRAPHIQUE ====== */}
+      <GraphStats />
     </div>
   );
 };

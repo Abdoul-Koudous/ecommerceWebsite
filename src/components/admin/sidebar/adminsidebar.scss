@@ -10,23 +10,42 @@
   position: fixed;
   left: 0;
   top: 0;
+  z-index: 100;
+  overflow: hidden;
+  transition: width 0.35s ease, padding 0.35s ease, transform 0.3s ease;
 
+  /* === Animation douce sur les éléments internes === */
+  .sidebar-logo,
+  .menu-left,
+  .logout-btn,
+  .submenu,
+  .arrow {
+    transition: all 0.3s ease;
+  }
+
+  /* ===================== LOGO ===================== */
   .sidebar-logo {
     position: sticky;
     top: 0;
     background: #fff;
     padding: 1.2rem;
     border-bottom: 1px solid #eee;
+    transition: all 0.3s ease;
+
     h2 {
       font-size: 1.4rem;
       font-weight: 700;
       color: #e63946;
+      transition: all 0.3s ease;
+
       span {
         color: #111;
+        transition: all 0.3s ease;
       }
     }
   }
 
+  /* ===================== LINKS ===================== */
   .sidebar-links {
     flex: 1;
     overflow-y: auto;
@@ -50,8 +69,8 @@
           font-weight: 500;
           padding: 0.6rem 0.9rem;
           border-radius: 8px;
-          transition: 0.3s ease;
           cursor: pointer;
+          transition: all 0.3s ease;
 
           &:hover {
             background: rgba(230, 57, 70, 0.08);
@@ -80,39 +99,6 @@
             transition: transform 0.3s ease;
           }
         }
-        .menu-link {
-          display: flex;
-          align-items: center;
-          justify-content: flex-start;
-          color: #333;
-          text-decoration: none;
-          font-weight: 500;
-          padding: 0.6rem 0.9rem;
-          border-radius: 8px;
-          transition: 0.3s ease;
-
-          &:hover {
-            background: rgba(230, 57, 70, 0.08);
-            color: #e63946;
-          }
-
-          &.active {
-            background: #e63946;
-            color: #fff;
-            box-shadow: 0 2px 6px rgba(230, 57, 70, 0.4);
-          }
-
-          .menu-left {
-            display: flex;
-            align-items: center;
-            gap: 6px; // tu peux réduire ici pour ajuster l’écart icône-texte
-          }
-
-          .icon {
-            font-size: 1.1rem;
-          }
-        }
-
 
         /* Sous-menu */
         .submenu {
@@ -136,8 +122,9 @@
             }
 
             &.active {
-              color: #e63946;
+              color: #fff;
               font-weight: 600;
+              background: #e63946;
             }
           }
         }
@@ -156,6 +143,7 @@
     }
   }
 
+  /* ===================== LOGOUT ===================== */
   .logout-btn {
     background: none;
     border: none;
@@ -176,6 +164,35 @@
 
     .icon {
       font-size: 1.1rem;
+    }
+  }
+
+  /* ===================== COLLAPSED ===================== */
+  &.collapsed {
+    width: 5rem;
+    transition: width 0.35s ease-in-out, transform 0.3s ease;
+
+    .label,
+    .submenu,
+    .arrow,
+    .sidebar-logo h2 span {
+      opacity: 0;
+      visibility: hidden;
+      transform: translateX(-10px);
+      transition: all 0.25s ease;
+    }
+
+    .sidebar-logo h2 {
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .menu-left {
+      justify-content: center;
+    }
+
+    .logout-btn {
+      justify-content: center;
     }
   }
 }

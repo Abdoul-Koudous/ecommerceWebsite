@@ -27,6 +27,8 @@ import LogoutPage from "./pages/myaccount/logoutpage";
 
 // === Admin ===
 import Dashboard from "./pages/admin/Dashboard";
+import Products from "./pages/admin/products";
+import AddProduct from "./pages/admin/products/addproduct";
 // (tu pourras ajouter plus tard : Products, Orders, Users, Settings, etc.)
 
 function App() {
@@ -60,6 +62,9 @@ function App() {
         {/* === ADMIN === */}
         <Route element={<AdminLayout />}>
           <Route path="/admin/dashboard" element={<Dashboard />} />
+          <Route path="/admin/products/lists" element={<Products />} />
+          <Route path="/admin/products/add" element={<AddProduct/>} />
+
           {/* tu pourras ajouter d’autres pages admin ici */}
         </Route>
       </Routes>
