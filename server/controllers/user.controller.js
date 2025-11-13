@@ -74,3 +74,62 @@ export async function registerUserController(request, response) {
         });
     }
 }
+
+export async function verifyEmailController(request, response) {
+    try {
+        const { email, otp } = request.body;
+
+        // Vérifier si l'utilisateur existe
+        const user = await UserModel.findOne({ email });
+
+        if (!user) {
+            return response.status(400).json({
+                error: true,
+                success: false,
+                message: "Utilisateur non trouvé"
+            });
+        }
+
+        // Vérifier si l'OTP correspond
+        const isCodeValid = user.otp === otp;
+
+        // Vérifier si l'OTP n'est pas expiré
+        const isNotExpired = user.otpExpires && user.otpExpires > Date.now();
+
+        if (!isCodeValid) {
+            return response.status(400).json({
+                error: true,
+                success: false,
+                message: "OTP invalide"
+            });
+        }
+
+        if (!isNotExpired) {
+            return response.status(400).json({
+                error: true,
+                success: false,
+                message: "OTP expiré"
+            });
+        }
+
+        // Si tout est bon → valider l'email
+        user.verify_email = true;
+        user.otp = null;
+        user.otpExpires = null;
+
+        await user.save();
+
+        return response.status(200).json({
+            error: false,
+            success: true,
+            message: "Email vérifié avec succès"
+        });
+
+    } catch (error) {
+        return response.status(500).json({
+            message: error.message || error,
+            error: true,
+            success: false
+        });
+    }
+}

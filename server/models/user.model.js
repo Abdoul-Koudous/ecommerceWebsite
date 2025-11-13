@@ -35,22 +35,22 @@ const userSchema = new mongoose.Schema({
         enum: ["Active", "Inactive", "Suspendu"],
         default: "Active"
     },
-    address_details: {
+    address_details:[ {
         type: mongoose.Schema.ObjectId,
         ref: 'address'
-    },
-    shopping_cart: {
+    }],
+    shopping_cart: [{
         type: mongoose.Schema.ObjectId,
         ref: 'cartProduit'
-    },
-    orderHistory: {
+    }],
+    orderHistory:[ {
         type: mongoose.Schema.ObjectId,
         ref: 'Commande'
-    },
-    opt: {
+    }],
+    otp: {
         type: String
     },
-    optExpires: {
+    otpExpires: {
         type: Date
     },
     role: {
