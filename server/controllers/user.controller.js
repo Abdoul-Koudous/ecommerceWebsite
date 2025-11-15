@@ -5,6 +5,17 @@ import sendEmailFun from "../config/sendEmail.js";
 import VerificationEmail from '../utils/verifyEmailTemplate.js';
 import generatedAccessToken from "../utils/generatedAccessToken.js";
 import generatedRefreshToken from "../utils/generatedRefreshToken.js";
+import { v2 as cloudinary} from 'cloudinary';
+import fs from 'fs';
+import { match } from "assert";
+import { text } from "stream/consumers";
+
+cloudinary.config({
+    cloud_name: process.env.cloudinary_Config_Cloud_Name,
+    api_key: process.env.cloudinary_Config_api_key,
+    api_secret: process.env.cloudinary_Config_api_secret,
+    secure: true,
+})
 
 export async function registerUserController(request, response) {
     try {
@@ -159,6 +170,14 @@ export async function loginUserController(request, response) {
             })
         }
 
+        if (user.verify_email!==true){
+            return response.status(400).json({
+                message: "Votre email n'est pas été verifier",
+                error:true,
+                success:false
+            })
+        }
+
         const checkPassword = await bcryptjs.compare(password, user.password);
 
         if(!checkPassword){
@@ -234,4 +253,171 @@ export async function logoutController(request,response) {
         
     }
     
+}
+
+var imagesArr = [];
+export async function userAvatarController(request, response) {
+    try {
+        imagesArr = [];
+
+        const userId = request.userId;
+        const image = request.files;
+
+        const user = await UserModel.findOne({ _id: userId });
+
+        if (!user) {
+            return response.status(500).json({
+                message: "Utilisateur introuvable",
+                error: true,
+                success: false
+            });
+        }
+
+        // --- SUPPRESSION DE L’ANCIEN AVATAR ---
+        const imgUrl = user.avatar;
+
+        if (imgUrl) {
+            const urlArr = imgUrl.split("/");
+            const avatar_image = urlArr[urlArr.length - 1];
+            const imageName = avatar_image.split(".")[0];
+
+            if (imageName) {
+                await cloudinary.uploader.destroy(imageName);
+            }
+        }
+
+        // --- UPLOAD DES NOUVEAUX AVATARS ---
+        const options = {
+            use_filename: true,
+            unique_filename: false,
+            overwrite: false,
+        };
+
+        for (let i = 0; i < image?.length; i++) {
+            await cloudinary.uploader.upload(
+                image[i].path,
+                options,
+                function (error, result) {
+                    imagesArr.push(result.secure_url);
+                    fs.unlinkSync(`telechargements/${request.files[i].filename}`);
+                }
+            );
+        }
+
+        user.avatar = imagesArr[0];
+        await user.save();
+
+        return response.status(200).json({
+            _id: userId,
+            avatar: imagesArr[0]
+        });
+
+    } catch (error) {
+        return response.status(500).json({
+            message: error.message || error,
+            error: true,
+            success: false
+        });
+    }
+}
+
+
+
+export async function removeImageFromCloudinary(request,response) {
+    const imgUrl = request.query.img;
+   
+    const urlArr = imgUrl.split("/");
+    const image = urlArr[urlArr.length - 1];
+
+    const imageName = image.split(".")[0];
+
+    if(imageName){
+        const res = await cloudinary.uploader.destroy(
+        imageName,
+        (error, result) => {
+            
+        }
+    );
+    if (res){
+        response.status(200).send(res);
+    }
+    }
+
+}
+
+export async function updateUserDetails(request, response) {
+    try {
+        const userId = request.userId;
+        const { name, email, mobile, password } = request.body;
+
+        // Vérifier que l'utilisateur existe
+        const userExist = await UserModel.findById(userId);
+        if (!userExist) {
+            return response.status(400).json({
+                message: "L'utilisateur ne peut pas être mis à jour",
+                error: true,
+                success: false
+            });
+        }
+
+        // Générer OTP si email changé
+        let verifyCode = "";
+        if (email && email !== userExist.email) {
+            verifyCode = Math.floor(100000 + Math.random() * 900000).toString();
+        }
+
+        // Hasher le mot de passe si modifié
+        let hashedPassword = userExist.password;
+        if (password) {
+            const salt = await bcryptjs.genSalt(10);
+            hashedPassword = await bcryptjs.hash(password, salt);
+        }
+
+        // Envoyer l’email avec le code si email changé
+        if (verifyCode !== "") {
+            const emailSent = await sendEmailFun(
+                email,
+                "Vérification d'email Yeboushop",
+                "",
+                VerificationEmail(name || userExist.name, verifyCode)
+            );
+
+            if (!emailSent) {
+                return response.status(500).json({
+                    message: "Impossible d'envoyer le code de vérification",
+                    error: true,
+                    success: false
+                });
+            }
+        }
+
+        // Mise à jour de l'utilisateur
+        const updateUser = await UserModel.findByIdAndUpdate(
+            userId,
+            {
+                name: name || userExist.name,
+                mobile: mobile || userExist.mobile,
+                email: email || userExist.email,
+                verify_email: verifyCode === "" ? userExist.verify_email : false,
+                password: hashedPassword,
+                otp: verifyCode !== "" ? verifyCode : null,
+                otpExpires: verifyCode !== "" ? Date.now() + 600000 : null
+            },
+            { new: true }
+        );
+
+        return response.status(200).json({
+            message: "L'utilisateur mis à jour avec succès",
+            error: false,
+            success: true,
+            user: updateUser
+        });
+
+    } catch (error) {
+        return response.status(500).json({
+            message: error.message || error,
+            error: true,
+            success: false
+        });
+    }
 }
