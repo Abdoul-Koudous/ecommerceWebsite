@@ -9,6 +9,7 @@ import { v2 as cloudinary} from 'cloudinary';
 import fs from 'fs';
 import { match } from "assert";
 import { text } from "stream/consumers";
+import { error } from "console";
 
 cloudinary.config({
     cloud_name: process.env.cloudinary_Config_Cloud_Name,
@@ -420,4 +421,254 @@ export async function updateUserDetails(request, response) {
             success: false
         });
     }
+}
+
+export async function forgotPasswordController(request, response) {
+    try {
+        const { email } = request.body;
+
+        const user = await UserModel.findOne({ email });
+        if (!user) {
+            return response.status(400).json({
+                message: "Email introuvable",
+                error: true,
+                success: false
+            });
+        }
+
+        // Générer OTP
+        const verifyCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+        user.otp = verifyCode;
+        user.otpExpires = Date.now() + 600000; // 10 minutes
+        await user.save();
+
+        // Envoyer email
+        const emailSent = await sendEmailFun(
+            email,
+            "Réinitialisation de mot de passe - Yeboushop",
+            "",
+            VerificationEmail(user.name, verifyCode)
+        );
+
+        if (!emailSent) {
+            return response.status(500).json({
+                message: "Impossible d'envoyer l'email",
+                error: true,
+                success: false
+            });
+        }
+
+        return response.json({
+            message: "Un code de vérification a été envoyé à votre email",
+            error: false,
+            success: true
+        });
+
+    } catch (error) {
+        return response.status(500).json({
+            message: error.message || error,
+            error: true,
+            success: false
+        });
+    }
+}
+
+export async function verifyForgotPasswordOtp(request, response) {
+    try {
+        const { email, otp } = request.body;
+
+        if (!email || !otp) {
+            return response.status(400).json({
+                message: "email et otp sont obligatoires",
+                error: true,
+                success: false
+            });
+        }
+
+        const user = await UserModel.findOne({ email });
+
+        if (!user) {
+            return response.status(400).json({
+                message: "Email introuvable",
+                error: true,
+                success: false
+            });
+        }
+
+        // Vérifier si le code correspond
+        if (otp !== user.otp) {
+            return response.status(400).json({
+                message: "OTP invalide",
+                error: true,
+                success: false
+            });
+        }
+
+        // Vérifier expiration
+        if (Date.now() > user.otpExpires) {
+            return response.status(400).json({
+                message: "OTP expiré",
+                error: true,
+                success: false
+            });
+        }
+
+        // Invalider le code
+        user.otp = null;
+        user.otpExpires = null;
+        await user.save();
+
+        return response.status(200).json({
+            message: "OTP vérifié avec succès",
+            error: false,
+            success: true
+        });
+
+    } catch (error) {
+        return response.status(500).json({
+            message: error.message || error,
+            error: true,
+            success: false
+        });
+    }
+}
+
+
+export async function resetpassword(request, response) {
+    try {
+        const { email, newPassword, confirmPassword } = request.body;
+
+        if (!email || !newPassword || !confirmPassword) {
+            return response.status(400).json({
+                message: "email, newPassword et confirmPassword sont obligatoires",
+                error: true,
+                success: false
+            });
+        }
+
+        const user = await UserModel.findOne({ email });
+        if (!user) {
+            return response.status(400).json({
+                message: "Email introuvable",
+                error: true,
+                success: false
+            });
+        }
+
+        // Si OTP non validé, empêcher le reset
+        if (user.otp !== null || user.otpExpires !== null) {
+            return response.status(400).json({
+                message: "Veuillez d'abord vérifier votre OTP",
+                error: true,
+                success: false
+            });
+        }
+
+        if (newPassword !== confirmPassword) {
+            return response.status(400).json({
+                message: "Les mots de passe ne correspondent pas",
+                error: true,
+                success: false
+            });
+        }
+
+        // Hash password
+        const salt = await bcryptjs.genSalt(10);
+        user.password = await bcryptjs.hash(newPassword, salt);
+
+        await user.save();
+
+        return response.status(200).json({
+            message: "Mot de passe modifié avec succès",
+            error: false,
+            success: true
+        });
+
+    } catch (error) {
+        return response.status(500).json({
+            message: error.message || error,
+            error: true,
+            success: false
+        });
+    }
+}
+
+export async function refreshToken(request, response) {
+    try {
+        const refreshToken = request.cookies.refreshToken || request?.headers?.authorization?.split(" ")[1]
+
+        if(!refreshToken){
+            return response.status(401).json({
+                message: "Token invalide",
+                error: true,
+                success : false
+            })
+        }
+
+        const verifyToken = await jwt.verify(refreshToken,process.env.SECRET_KEY_REFRESH_TOKEN)
+        if(!verifyToken){
+            return response.status(401).json({
+                message: "Token est expirer",
+                error: true,
+                success : false
+            })
+        }
+
+        const userId = verifyToken.id;
+        const newAccessToken = await generatedAccessToken(userId)
+
+        const cookiesOption={
+            httpOnly : true,
+            secure : true,
+            sameSite: "None"
+        }
+        response.cookie('accessToken',newAccessToken,cookiesOption)
+
+        return response.json({
+            message: "Nouveau jeton d'accès généré",
+            error : false,
+            success: true,
+            date : {
+                accessToken : newAccessToken
+            }
+        })
+        
+    } catch (error) {
+        return response.status(500).json({
+            message: error.message || error,
+            error: error,
+            success: false
+        })
+        
+    }
+
+    
+}
+
+
+export async function UserDetails(request, response) {
+    try {
+        const userId = request.userId
+
+        console.log(userId)
+
+        const user =await UserModel.findById(userId).select('-password -refresh_token')
+
+        return response.json({
+            message: "Les details de l'utilisateurs",
+            date: user,
+            error: false,
+            success: true
+        })
+        
+    } catch (error) {
+        return response.status(500).json({
+            message: "Il ya un probleme",
+            error: true,
+            success: false
+        })
+        
+    }
+    
 }
