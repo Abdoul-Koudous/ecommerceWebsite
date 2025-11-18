@@ -6,6 +6,7 @@ import morgan from "morgan";
 import helmet from "helmet";
 import connectDb from "./config/connectDB.js";
 import userRouter from './route/user.route.js'
+import categoryRouter from "./route/category.route.js";
 
 dotenv.config();
 
@@ -31,7 +32,8 @@ app.get("/", (req, res) => {
   });
 });
 
-app.use('/api/users', userRouter)
+app.use('/api/users', userRouter);
+app.use('/api/category', categoryRouter);
 
 // 🔗 Connexion à MongoDB + Lancement du serveur
 connectDb().then(() => {
