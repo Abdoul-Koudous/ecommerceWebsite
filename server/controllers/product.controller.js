@@ -1,9 +1,11 @@
-import ProductModel from "../models/product.model";
+import ProductModel from "../models/product.model.js";
 
 
 
 import { v2 as cloudinary} from 'cloudinary';
 import fs from 'fs';
+import CategoryModel from "../models/category.model.js";
+import { error } from "console";
 
 cloudinary.config({
     cloud_name: process.env.cloudinary_Config_Cloud_Name,
@@ -45,6 +47,549 @@ export async function uploadImages(request, response) {
     } catch (error) {
         return response.status(500).json({
             message: error.message || error,
+            error: true,
+            success: false
+        });
+    }
+}
+
+export async function createProduct(request, response) {
+    try {
+
+        let product = new ProductModel({
+            name: request.body.name,
+            description: request.body.description,
+            images: imagesArr, // ou request.body.images
+            brand: request.body.brand,
+            price: request.body.price,
+            oldPrice: request.body.oldPrice,
+            catName: request.body.catName,
+            catId: request.body.catId,
+            subCatId: request.body.subCatId,
+            subCat: request.body.subCat,
+            thirdsubCat: request.body.thirdsubCat,
+            thirdsubCatId: request.body.thirdsubCatId,
+            countIntStock: request.body.countIntStock,
+            rating: request.body.rating,
+            isFeatured: request.body.isFeatured,
+            discount: request.body.discount,
+            productRam: request.body.productRam,
+            size: request.body.size,
+            productWeight: request.body.productWeight,
+
+            // ✅ OBLIGATOIRE pour éviter l'erreur
+            category: request.body.category
+        });
+
+        product = await product.save();
+
+        imagesArr = []; // reset
+
+        return response.status(200).json({
+            message: "Product créé avec succès",
+            error: false,
+            success: true,
+            product
+        });
+
+    } catch (error) {
+        return response.status(500).json({
+            message: error.message || error,
+            error: true,
+            success: false
+        });
+    }
+}
+
+
+export async function getAllProducts(request, response) {
+    try {
+        const page = parseInt(request.query.page) || 1;
+        const perPage = parseInt(request.query.perPage);
+        const totalPosts = await ProductModel.countDocuments();
+        const totalPages = Math.ceil(totalPosts / perPage);
+
+        if (page > totalPages){
+            return response.status(404).json({
+                message: "La page Introuvable",
+                success: false,
+                error: true
+            });
+        }
+
+        const product = await ProductModel.find().populate("category")
+        .skip((page - 1) * perPage)
+        .limit(perPage)
+        .exec();
+
+
+
+
+        const products = await ProductModel.find();
+
+        if(!products){
+            response.status(500).json({
+                error: true,
+                success: false
+            })
+        }
+
+        return response.status(200).json({
+            error: false,
+            success: true,
+            products: products,
+            totalPages: totalPages,
+            page:page,
+        })
+
+        
+    } catch (error) {
+        return response.status(500).json({
+            message: error.message || error,
+            error: true,
+            success: false
+        });
+    }
+    
+}
+
+
+export async function getAllProductsByCatId(request, response) {
+    try {
+
+        const page = parseInt(request.query.page) || 1;
+        const perPage = parseInt(request.query.perPage) || 20;
+
+        // 1. Calculer le nombre total de produits de cette catégorie
+        const totalPosts = await ProductModel.countDocuments({
+            catId: request.params.id
+        });
+
+        if (totalPosts === 0) {
+            return response.status(404).json({
+                message: "Aucun produit trouvé pour cette catégorie",
+                success: false,
+                error: true
+            });
+        }
+
+        const totalPages = Math.ceil(totalPosts / perPage);
+        if (page > totalPages) {
+            return response.status(404).json({
+                message: "Page introuvable",
+                success: false,
+                error: true
+            });
+        }
+
+        // 2. Récupérer les produits filtrés
+        const products = await ProductModel.find({
+            catId: request.params.id
+        })
+        .populate("category") // uniquement si category est ref: "Categorie"
+        .skip((page - 1) * perPage)
+        .limit(perPage);
+
+        return response.status(200).json({
+            error: false,
+            success: true,
+            products: products,
+            totalPages: totalPages,
+            page: page
+        });
+
+    } catch (error) {
+        return response.status(500).json({
+            message: error.message,
+            error: true,
+            success: false
+        });
+    }
+}
+
+export async function getAllProductsByCatName(request, response) {
+    try {
+
+        const page = parseInt(request.query.page) || 1;
+        const perPage = parseInt(request.query.perPage) || 20;
+
+        const catName = request.query.catName;
+
+        if (!catName) {
+            return response.status(400).json({
+                message: "catName est obligatoire dans la requête",
+                success: false,
+                error: true
+            });
+        }
+
+        // 1. Calculer le nombre de produits de cette catégorie
+        const totalPosts = await ProductModel.countDocuments({ catName });
+
+        if (totalPosts === 0) {
+            return response.status(404).json({
+                message: "Aucun produit trouvé pour cette catégorie",
+                success: false,
+                error: true
+            });
+        }
+
+        const totalPages = Math.ceil(totalPosts / perPage);
+
+        if (page > totalPages) {
+            return response.status(404).json({
+                message: "Page introuvable",
+                success: false,
+                error: true
+            });
+        }
+
+        // 2. Récupérer les produits filtrés par catName
+        const products = await ProductModel.find({ catName })
+            .populate("category") // si ref: "Categorie"
+            .skip((page - 1) * perPage)
+            .limit(perPage);
+
+        return response.status(200).json({
+            error: false,
+            success: true,
+            products,
+            totalPages,
+            page
+        });
+
+    } catch (error) {
+        return response.status(500).json({
+            message: error.message,
+            error: true,
+            success: false
+        });
+    }
+}
+
+export async function getAllProductsBySubCatId(request, response) {
+    try {
+
+        const page = parseInt(request.query.page) || 1;
+        const perPage = parseInt(request.query.perPage) || 20;
+
+        // 1. Calculer le nombre total de produits de cette catégorie
+        const totalPosts = await ProductModel.countDocuments({
+            subCatId: request.params.id
+        });
+
+        if (totalPosts === 0) {
+            return response.status(404).json({
+                message: "Aucun produit trouvé pour cette catégorie",
+                success: false,
+                error: true
+            });
+        }
+
+        const totalPages = Math.ceil(totalPosts / perPage);
+        if (page > totalPages) {
+            return response.status(404).json({
+                message: "Page introuvable",
+                success: false,
+                error: true
+            });
+        }
+
+        // 2. Récupérer les produits filtrés
+        const products = await ProductModel.find({
+            subCatId: request.params.id
+        })
+        .populate("category") // uniquement si category est ref: "Categorie"
+        .skip((page - 1) * perPage)
+        .limit(perPage);
+
+        return response.status(200).json({
+            error: false,
+            success: true,
+            products: products,
+            totalPages: totalPages,
+            page: page
+        });
+
+    } catch (error) {
+        return response.status(500).json({
+            message: error.message,
+            error: true,
+            success: false
+        });
+    }
+}
+
+export async function getAllProductsBySubCatName(request, response) {
+    try {
+
+        const page = parseInt(request.query.page) || 1;
+        const perPage = parseInt(request.query.perPage) || 20;
+
+        const subCat = request.query.subCat;
+
+        if (!subCat) {
+            return response.status(400).json({
+                message: "catName est obligatoire dans la requête",
+                success: false,
+                error: true
+            });
+        }
+
+        // 1. Calculer le nombre de produits de cette catégorie
+        const totalPosts = await ProductModel.countDocuments({ subCat });
+
+        if (totalPosts === 0) {
+            return response.status(404).json({
+                message: "Aucun produit trouvé pour cette catégorie",
+                success: false,
+                error: true
+            });
+        }
+
+        const totalPages = Math.ceil(totalPosts / perPage);
+
+        if (page > totalPages) {
+            return response.status(404).json({
+                message: "Page introuvable",
+                success: false,
+                error: true
+            });
+        }
+
+        // 2. Récupérer les produits filtrés par catName
+        const products = await ProductModel.find({ subCat })
+            .populate("category") // si ref: "Categorie"
+            .skip((page - 1) * perPage)
+            .limit(perPage);
+
+        return response.status(200).json({
+            error: false,
+            success: true,
+            products,
+            totalPages,
+            page
+        });
+
+    } catch (error) {
+        return response.status(500).json({
+            message: error.message,
+            error: true,
+            success: false
+        });
+    }
+}
+
+export async function getAllProductsByThirdLavelCatId(request, response) {
+    try {
+
+        const page = parseInt(request.query.page) || 1;
+        const perPage = parseInt(request.query.perPage) || 20;
+
+        // 1. Calculer le nombre total de produits de cette catégorie
+        const totalPosts = await ProductModel.countDocuments({
+            thirdsubCatId: request.params.id
+        });
+
+        if (totalPosts === 0) {
+            return response.status(404).json({
+                message: "Aucun produit trouvé pour cette catégorie",
+                success: false,
+                error: true
+            });
+        }
+
+        const totalPages = Math.ceil(totalPosts / perPage);
+        if (page > totalPages) {
+            return response.status(404).json({
+                message: "Page introuvable",
+                success: false,
+                error: true
+            });
+        }
+
+        // 2. Récupérer les produits filtrés
+        const products = await ProductModel.find({
+            thirdsubCatId: request.params.id
+        })
+        .populate("category") // uniquement si category est ref: "Categorie"
+        .skip((page - 1) * perPage)
+        .limit(perPage);
+
+        return response.status(200).json({
+            error: false,
+            success: true,
+            products: products,
+            totalPages: totalPages,
+            page: page
+        });
+
+    } catch (error) {
+        return response.status(500).json({
+            message: error.message,
+            error: true,
+            success: false
+        });
+    }
+}
+
+export async function getAllProductsByThirdLavelCatName(request, response) {
+    try {
+
+        const page = parseInt(request.query.page) || 1;
+        const perPage = parseInt(request.query.perPage) || 20;
+
+        const thirdsubCat = request.query.thirdsubCat;
+
+        if (!thirdsubCat) {
+            return response.status(400).json({
+                message: "catName est obligatoire dans la requête",
+                success: false,
+                error: true
+            });
+        }
+
+        // 1. Calculer le nombre de produits de cette catégorie
+        const totalPosts = await ProductModel.countDocuments({ thirdsubCat });
+
+        if (totalPosts === 0) {
+            return response.status(404).json({
+                message: "Aucun produit trouvé pour cette catégorie",
+                success: false,
+                error: true
+            });
+        }
+
+        const totalPages = Math.ceil(totalPosts / perPage);
+
+        if (page > totalPages) {
+            return response.status(404).json({
+                message: "Page introuvable",
+                success: false,
+                error: true
+            });
+        }
+
+        // 2. Récupérer les produits filtrés par catName
+        const products = await ProductModel.find({ thirdsubCat })
+            .populate("category") // si ref: "Categorie"
+            .skip((page - 1) * perPage)
+            .limit(perPage);
+
+        return response.status(200).json({
+            error: false,
+            success: true,
+            products,
+            totalPages,
+            page
+        });
+
+    } catch (error) {
+        return response.status(500).json({
+            message: error.message,
+            error: true,
+            success: false
+        });
+    }
+}
+
+export async function getAllProductsByPrice(request, response) {
+    try {
+
+        const { catId, subCatId, thirdsubCatId, minPrice, maxPrice } = request.query;
+
+        // Construire dynamiquement le filtre Mongo
+        let filter = {};
+
+        if (catId) filter.catId = catId;
+        if (subCatId) filter.subCatId = subCatId;
+        if (thirdsubCatId) filter.thirdsubCatId = thirdsubCatId;
+
+        // Récupérer les produits par catégorie
+        const products = await ProductModel.find(filter).populate("category");
+
+        // Filtrer par prix
+        const filteredProducts = products.filter((product) => {
+            if (minPrice && product.price < parseInt(minPrice)) return false;
+            if (maxPrice && product.price > parseInt(maxPrice)) return false;
+            return true;
+        });
+
+        return response.status(200).json({
+            error: false,
+            success: true,
+            products: filteredProducts,
+            totalPages: 0,
+            page: 0
+        });
+
+    } catch (error) {
+        return response.status(500).json({
+            message: error.message,
+            error: true,
+            success: false,
+        });
+    }
+}
+export async function getAllProductsByRating(request, response) {
+    try {
+        const page = parseInt(request.query.page) || 1;
+        const perPage = parseInt(request.query.perPage) || 20;
+
+        const { rating, catId, subCatId, thirdsubCatId } = request.query;
+
+        if (!rating) {
+            return response.status(400).json({
+                message: "rating est obligatoire",
+                success: false,
+                error: true
+            });
+        }
+
+        // Construire le filtre
+        let filter = { rating: parseFloat(rating) };
+
+        if (catId) filter.catId = catId;
+        if (subCatId) filter.subCatId = subCatId;
+        if (thirdsubCatId) filter.thirdsubCatId = thirdsubCatId;
+
+        // Compter les produits correspondants
+        const totalPosts = await ProductModel.countDocuments(filter);
+
+        if (totalPosts === 0) {
+            return response.status(404).json({
+                message: "Aucun produit trouvé",
+                success: false,
+                error: true
+            });
+        }
+
+        const totalPages = Math.ceil(totalPosts / perPage);
+        if (page > totalPages) {
+            return response.status(404).json({
+                message: "Page introuvable",
+                success: false,
+                error: true
+            });
+        }
+
+        // Récupérer les produits
+        const products = await ProductModel.find(filter)
+            .populate("category")
+            .skip((page - 1) * perPage)
+            .limit(perPage);
+
+        return response.status(200).json({
+            error: false,
+            success: true,
+            products,
+            totalPages,
+            page
+        });
+
+    } catch (error) {
+        return response.status(500).json({
+            message: error.message,
             error: true,
             success: false
         });

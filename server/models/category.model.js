@@ -22,7 +22,7 @@ const categorySchema = mongoose.Schema({
 
 },{timestamps:true});
 
-const CategoryModel = mongoose.model('Categeorie', categorySchema)
+const CategoryModel = mongoose.model('Categorie', categorySchema)
 
 
 export default CategoryModel

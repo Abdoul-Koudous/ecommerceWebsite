@@ -7,6 +7,7 @@ import helmet from "helmet";
 import connectDb from "./config/connectDB.js";
 import userRouter from './route/user.route.js'
 import categoryRouter from "./route/category.route.js";
+import productRouter from "./route/product.route.js";
 
 dotenv.config();
 
@@ -34,6 +35,7 @@ app.get("/", (req, res) => {
 
 app.use('/api/users', userRouter);
 app.use('/api/category', categoryRouter);
+app.use('/api/product', productRouter);
 
 // 🔗 Connexion à MongoDB + Lancement du serveur
 connectDb().then(() => {
