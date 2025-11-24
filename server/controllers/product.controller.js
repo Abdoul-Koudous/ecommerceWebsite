@@ -595,3 +595,210 @@ export async function getAllProductsByRating(request, response) {
         });
     }
 }
+
+export async function getProductsCount(request, response) {
+    try {
+        const productscount = await ProductModel.countDocuments();
+
+        if(!productscount){
+            response.status(500).json({
+                error:true,
+                success:false
+            })
+        }
+
+        return response.status(200).json({
+            error: false,
+            success:true,
+            productscount:productscount
+        })
+        
+    } catch (error) {
+        return response.status(500).json({
+            message: error.message,
+            error: true,
+            success: false
+        });
+    }
+    
+}
+
+export async function getAllFeaturedProducts(request, response) {
+    try {
+
+        const products = await ProductModel.find({ isFeatured: true })
+            .populate("category");
+
+        if (!products) {
+            return response.status(500).json({
+                error: true,
+                success: false,
+                message: "Erreur lors de la récupération des produits"
+            });
+        }
+
+        return response.status(200).json({
+            error: false,
+            success: true,
+            products
+        });
+
+    } catch (error) {
+        return response.status(500).json({
+            message: error.message,
+            error: true,
+            success: false
+        });
+    }
+}
+
+
+export async function deleteProducts(request, response){
+    const product = await ProductModel.findById(request.params.id).populate("category");
+
+    if(!product){
+        return response.status.status(404).json({
+            message: "Produit introuvable",
+            error: true,
+            success: false
+        })
+    }
+
+    const images = product.images;
+
+    let img="";
+
+    for(img of images){
+        const imagesArr = img;
+        const urlArr = imgUrl.split("/");
+        const image = urlArr[urlArr.length - 1];
+        const imageName = image.split(".")[0];
+
+        if(imageName){
+            cloudinary.uploader.destroy(imageName, (error,result) => {
+
+            });
+        }
+    }
+
+    const deleteProduct = await ProductModel.findByIdAndDelete(request.params.id);
+
+    if(!deleteProduct){
+        response.status(400).json({
+            message: "Produit non suprimer",
+            success:false,
+            error:true 
+        });
+    }
+    return response.status(200).json({
+        success: true,
+        error: false,
+        message: "produit suprimer",
+    });
+}
+
+export async function getProduct(request, response){
+    try {
+        const product = await ProductModel.findById(request.params.id).populate("category");
+
+        if(!product){
+            return response.status(404).json({
+                message: "le produit est introuvable",
+                error: true,
+                success:false
+            });
+        }
+
+        return response.status(200).json({
+            error: false,
+            success: true,
+            product:product
+        })
+        
+    } catch (error) {
+        return response.status(500).json({
+            message: error.message,
+            error: true,
+            success: false
+        });
+        
+    }
+}
+
+export async function removeImageFromCloudinary(req, res) {
+    try {
+        const imgUrl = req.query.img;
+        if (!imgUrl) {
+            return res.status(400).json({ error: true, message: "Aucune image fournie" });
+        }
+
+        const imageName = imgUrl.split("/").pop().split(".")[0];
+        if (!imageName) {
+            return res.status(400).json({ error: true, message: "Nom d'image invalide" });
+        }
+
+        const result = await cloudinary.uploader.destroy(imageName);
+
+        return res.status(200).json({ success: true, result });
+
+    } catch (error) {
+        return res.status(500).json({ error: true, message: error.message });
+    }
+}
+
+
+export async function updateProduct(request, response) {
+    try {
+        const product = await ProductModel.findByIdAndUpdate(
+            request.params.id,
+            {
+                name: request.body.name,
+                description: request.body.description,
+                images: request.body.images,
+                brand: request.body.brand,
+                price: request.body.price,
+                oldPrice: request.body.oldPrice,
+                catName: request.body.catName,
+                catId: request.body.catId,
+                subCatId: request.body.subCatId,
+                subCat: request.body.subCat,
+                thirdsubCat: request.body.thirdsubCat,
+                thirdsubCatId: request.body.thirdsubCatId,
+                countIntStock: request.body.countIntStock,
+                rating: request.body.rating,
+                isFeatured: request.body.isFeatured,
+                discount: request.body.discount,
+                productRam: request.body.productRam,
+                size: request.body.size,
+                productWeight: request.body.productWeight,
+
+                // IMPORTANT : category doit être l'ID
+                category: request.body.category
+            },
+            { new: true }
+        );
+
+        if (!product) {
+            return response.status(404).json({
+                message: "Le produit n'a pas été mis à jour",
+                success: false
+            });
+        }
+
+        imagesArr = [];
+
+        return response.status(200).json({
+            message: "Le produit a été mis à jour avec succès",
+            error: false,
+            success: true,
+            product
+        });
+
+    } catch (error) {
+        return response.status(500).json({
+            message: error.message,
+            error: true,
+            success: false
+        });
+    }
+}
