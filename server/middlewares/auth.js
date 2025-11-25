@@ -7,6 +7,10 @@ const auth = async(request,response,next)=>{
         [1];
 
         if(!token){
+            token = request.query.token;
+        }
+
+        if(!token){
             return response.status(401).json({
                 message : "Fournir un jeton"
             })

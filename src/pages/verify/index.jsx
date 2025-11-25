@@ -1,75 +1,91 @@
-import React, { useEffect, useState } from "react";
-import { FaCheckCircle } from "react-icons/fa";
+import React, { useState, useContext } from "react";
+import { postData } from "../utils/api";
 import "./verify.scss";
+import { ToastContext } from "../../context/ToastContext";
+import CircularProgress from "../../components/CircularProgress/CircularProgress";
+import { useNavigate } from "react-router";
 
-const Verify = ({ email = "exemple@email.com" }) => {
+const Verify = () => {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
-  const [showPopup, setShowPopup] = useState(true);
+  const [loading, setLoading] = useState(false);
 
-  // Masquer le popup après 3 secondes
-  useEffect(() => {
-    const timer = setTimeout(() => setShowPopup(false), 3000);
-    return () => clearTimeout(timer);
-  }, []);
+  const { openToast } = useContext(ToastContext);
+  const navigate = useNavigate();
 
+  // 📌 Saisie OTP
   const handleChange = (value, index) => {
     if (/^[0-9]?$/.test(value)) {
       const newOtp = [...otp];
       newOtp[index] = value;
       setOtp(newOtp);
 
-      // Passe automatiquement au champ suivant
       if (value && index < 5) {
         document.getElementById(`otp-${index + 1}`).focus();
       }
     }
   };
 
+  // 📌 Envoi OTP au backend
   const handleSubmit = (e) => {
     e.preventDefault();
+    setLoading(true);
+
     const code = otp.join("");
-    console.log("Code OTP saisi :", code);
-    // Ici tu ajouteras la logique d’envoi vers ton backend
+
+    postData("/api/users/verifyEmail", {
+      email: localStorage.getItem("userEmail"),
+      otp: code
+    })
+      .then((res) => {
+        if (res?.error === false) {
+          openToast("success", res?.message);
+          localStorage.removeItem("userEmail");
+
+          // ⏳ délai léger avant redirection
+          setTimeout(() => {
+            navigate("/login");
+          }, 800);
+
+        } else {
+          openToast("error", res?.message || "Code OTP incorrect");
+        }
+      })
+      .finally(() => setLoading(false));
   };
 
   return (
     <div className="verify-container">
-      {/* ✅ Popup de confirmation OTP envoyé */}
-      {showPopup && (
-        <div className="otp-popup">
-          <FaCheckCircle className="icon" />
-          <span>Code OTP envoyé avec succès </span>
-        </div>
-      )}
 
       <div className="verify-box">
         <h2>Vérification OTP</h2>
+
         <p>
-          Veuillez entrer le code à 6 chiffres envoyé à votre adresse e-mail{" "}
-          <span className="user-email">{email}</span>.
+          Entrez le code envoyé à :
+          <span className="user-email">{localStorage.getItem("userEmail")}</span>
         </p>
 
-        <form onSubmit={handleSubmit} className="otp-form">
+        <form className="otp-form" onSubmit={handleSubmit}>
           <div className="otp-inputs">
-            {otp.map((digit, index) => (
+            {otp.map((digit, i) => (
               <input
-                key={index}
-                id={`otp-${index}`}
+                key={i}
+                id={`otp-${i}`}
                 type="text"
                 maxLength="1"
                 value={digit}
-                onChange={(e) => handleChange(e.target.value, index)}
+                onChange={(e) => handleChange(e.target.value, i)}
+                disabled={loading}
               />
             ))}
           </div>
 
-          <button type="submit" className="verify-btn">
-            Vérifier
+          <button type="submit" className="verify-btn" disabled={loading}>
+            {loading ? <CircularProgress /> : "Vérifier"}
           </button>
         </form>
 
         <p className="resend-text">
-          Vous n’avez pas reçu de code ? <a href="#">Renvoyer le code</a>
+          Pas reçu ? <a href="#">Renvoyer le code</a>
         </p>
       </div>
     </div>

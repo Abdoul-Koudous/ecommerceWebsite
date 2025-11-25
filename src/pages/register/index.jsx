@@ -1,11 +1,49 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { FaUser, FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
-import "./register.scss"; // le style ci-dessous
+import "./register.scss";
+import { ToastContext } from "../../context/ToastContext";
+import { postData } from "../utils/api";
+import CircularProgress from "../../components/CircularProgress/CircularProgress";
+import { useNavigate } from "react-router";
 
 const Register = () => {
+  const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const togglePassword = () => setShowPassword(!showPassword);
+
+  const { openToast } = useContext(ToastContext);
+  const navigate = useNavigate();
+
+  const [formFields, setFormFields] = useState({
+    name: "",
+    email: "",
+    password: ""
+  });
+
+  // 📌 Gère les inputs
+  const onChangeInput = (e) => {
+    setFormFields({ ...formFields, [e.target.name]: e.target.value });
+  };
+
+  // 📌 Action formulaire
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    postData("/api/users/register", formFields)
+      .then((res) => {
+        if (res.error) {
+          openToast("error", res.message);
+        } else {
+          openToast("success", res.message);
+          localStorage.setItem("userEmail", formFields.email);
+
+          // 🚀 Redirection vers OTP
+          navigate("/verify");
+        }
+      })
+      .finally(() => setIsLoading(false));
+  };
 
   return (
     <div className="register-page">
@@ -13,55 +51,68 @@ const Register = () => {
         <h2 className="register-title">Créer un compte</h2>
         <p className="register-subtitle">Inscrivez-vous pour commencer</p>
 
-        <form className="register-form">
-          {/* Nom complet */}
+        <form className="register-form" onSubmit={handleSubmit}>
           <div className="form-group">
             <FaUser className="input-icon" />
-            <input type="text" id="name" placeholder=" " required />
-            <label htmlFor="name">Nom complet</label>
+            <input
+              type="text"
+              name="name"
+              placeholder=" "
+              value={formFields.name}
+              onChange={onChangeInput}
+              disabled={isLoading}
+            />
+            <label>Nom complet</label>
           </div>
 
-          {/* Email */}
           <div className="form-group">
             <FaEnvelope className="input-icon" />
-            <input type="email" id="email" placeholder=" " required />
-            <label htmlFor="email">Adresse e-mail</label>
+            <input
+              type="email"
+              name="email"
+              placeholder=" "
+              value={formFields.email}
+              onChange={onChangeInput}
+              disabled={isLoading}
+            />
+            <label>Adresse email</label>
           </div>
 
-          {/* Mot de passe */}
           <div className="form-group">
             <FaLock className="input-icon" />
             <input
               type={showPassword ? "text" : "password"}
-              id="password"
+              name="password"
               placeholder=" "
-              required
+              value={formFields.password}
+              onChange={onChangeInput}
+              disabled={isLoading}
             />
-            <label htmlFor="password">Mot de passe</label>
-            <span className="toggle-password" onClick={togglePassword}>
+            <label>Mot de passe</label>
+
+            <span
+              className="toggle-password"
+              onClick={() => setShowPassword(!showPassword)}
+            >
               {showPassword ? <FaEyeSlash /> : <FaEye />}
             </span>
           </div>
 
-          {/* Bouton d'inscription */}
-          <button type="submit" className="btn-register">
-            S'inscrire
+          <button type="submit" className="btn-register" disabled={isLoading}>
+            {isLoading ? <CircularProgress /> : "S'inscrire"}
           </button>
         </form>
 
-        {/* Connexion avec Google */}
         <div className="social-register">
-          <p className="divider">ou continuer avec un compte social</p>
+          <p className="divider">ou continuer avec</p>
           <button className="btn-google">
             <FcGoogle className="google-icon" />
-            Se connecter avec Google
+            Google
           </button>
         </div>
 
-        {/* Lien vers la connexion */}
         <p className="login-text">
-          Vous avez déjà un compte ?{" "}
-          <a href="/login">Se connecter</a>
+          Vous avez déjà un compte ? <a href="/login">Se connecter</a>
         </p>
       </div>
     </div>

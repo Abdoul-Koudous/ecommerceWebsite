@@ -137,6 +137,17 @@ header .header .container {
             }
         }
         }
+        .lien2 {
+                font-size: 13px;
+                text-decoration: none;
+                transition: 0.2s ease-in-out;
+                font-weight: 500;
+                color: black;
+
+                &:hover {
+                color: rgb(130, 11, 11);
+                }
+            }
 
 }
 

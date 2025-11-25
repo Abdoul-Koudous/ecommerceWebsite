@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react'; 
+import { Link, useNavigate } from 'react-router-dom';
 import Search from '../search';
 import Navigation from './navigation';
 import CartPanel from '../cartpanel';
@@ -11,27 +11,49 @@ import {
   FaBoxOpen,
   FaSignOutAlt,
 } from "react-icons/fa";
-
+import { fetchDataFromApi } from '../../pages/utils/api';
 
 const Header = () => {
   const [cartOpen, setCartOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const navigate = useNavigate();
 
-  const cartItems = [
-    { image: "/od11.jpg",name: "Produit 1", quantity: 2, price: 1500 },
-    { image: "/od21.jpg",name: "Produit 2", quantity: 1, price: 2500 },
-    { image: "/od31.jpg",name: "Produit 2", quantity: 1, price: 2500 },
-    { image: "/od21.jpg",name: "Produit 2", quantity: 1, price: 2500 },
-    { image: "/od21.jpg",name: "Produit 2", quantity: 1, price: 2500 },
-    { image: "/od21.jpg",name: "Produit 2", quantity: 1, price: 2500 },
-    { image: "/od21.jpg",name: "Produit 2", quantity: 1, price: 2500 },
-    { image: "/od21.jpg",name: "Produit 2", quantity: 1, price: 2500 },
-    
+   const cartItems = [
+      { image: "/od11.jpg",name: "Produit 1", quantity: 2, price: 1500 },
+      { image: "/od21.jpg",name: "Produit 2", quantity: 1, price: 2500 },
+      { image: "/od31.jpg",name: "Produit 2", quantity: 1, price: 2500 },
+      { image: "/od21.jpg",name: "Produit 2", quantity: 1, price: 2500 },
+      { image: "/od21.jpg",name: "Produit 2", quantity: 1, price: 2500 },
+      { image: "/od21.jpg",name: "Produit 2", quantity: 1, price: 2500 },
+      { image: "/od21.jpg",name: "Produit 2", quantity: 1, price: 2500 },
+      { image: "/od21.jpg",name: "Produit 2", quantity: 1, price: 2500 },
+      
   ];
 
   const toggleCart = () => setCartOpen(!cartOpen);
 
-   return (
+  const isLoggedIn = !!localStorage.getItem("accesstoken");
+  const userEmail = localStorage.getItem("userEmail") || "Utilisateur";
+
+  const logout = async () => {
+    try {
+      // Appel backend pour supprimer cookies
+      await fetchDataFromApi("/api/users/logout", { method: "POST" });
+      
+      // Nettoyage localStorage
+      localStorage.removeItem("accesstoken");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("userEmail");
+
+      // Redirection vers accueil
+      navigate("/");
+      window.location.reload(); // pour rafraîchir le header
+    } catch (error) {
+      console.error("Erreur lors de la déconnexion:", error);
+    }
+  }
+
+  return (
     <header>
       <div className="top-strip">
         <div className="container">
@@ -59,39 +81,47 @@ const Header = () => {
 
           <div className="cont3">
             <ul>
-              {/* 🔽 Bloc utilisateur amélioré */}
-              <li className="user-menu">
-                <div className="user-info" onClick={() => setDropdownOpen(!dropdownOpen)}>
-                  <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRCzK6DKnIE7MM_7cuaQAJlpxUHYs8yKDT3yg&s" alt="User" className="user-avatar" />
-                  <div className="user-details">
-                    <span className="user-name">John Doe</span>
-                    <span className="user-email">john@example.com</span>
-                  </div>
+              {!isLoggedIn ? (
+                <div>
+                  <Link className='lien2' to="/login">Connexion</Link> |{" "}
+                  <Link className='lien2' to="/register">Enregistrement</Link>
                 </div>
+              ) : (
+                <li className="user-menu">
+                  <div className="user-info" onClick={() => setDropdownOpen(!dropdownOpen)}>
+                    <img
+                      src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRCzK6DKnIE7MM_7cuaQAJlpxUHYs8yKDT3yg&s"
+                      alt="User"
+                      className="user-avatar"
+                    />
+                    <div className="user-details">
+                      <span className="user-name">{userEmail}</span>
+                      <span className="user-email">{userEmail}</span>
+                    </div>
+                  </div>
 
-                {dropdownOpen && (
-                  <ul className="dropdown-menu">
-                    <li>
-                      <FaUser className="icon" />
-                      <Link to="/account/profile">Mon compte</Link>
-                    </li>
-                    <li>
-                      <FaBoxOpen className="icon" />
-                      <Link to="/account/orders">Mes commandes</Link>
-                    </li>
-                    <li>
-                      <FaHeart className="icon" />
-                      <Link to="/account/wishlist">Ma liste</Link>
-                    </li>
-                    <li>
-                      <FaSignOutAlt className="icon" />
-                      <Link to="/account/logout">Déconnexion</Link>
-                    </li>
-                  </ul>
-                )}
-
-
-              </li>
+                  {dropdownOpen && (
+                    <ul className="dropdown-menu">
+                      <li>
+                        <FaUser className="icon" />
+                        <Link to="/account/profile">Mon compte</Link>
+                      </li>
+                      <li>
+                        <FaBoxOpen className="icon" />
+                        <Link to="/account/orders">Mes commandes</Link>
+                      </li>
+                      <li>
+                        <FaHeart className="icon" />
+                        <Link to="/account/wishlist">Ma liste</Link>
+                      </li>
+                      <li onClick={logout}>
+                        <FaSignOutAlt className="icon" />
+                        <span style={{ cursor: "pointer" }}>Déconnexion</span>
+                      </li>
+                    </ul>
+                  )}
+                </li>
+              )}
 
               <li className="iconBox">
                 <FaHeart className="icon" />

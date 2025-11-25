@@ -10,7 +10,7 @@ import Home from "./pages/home";
 import ProductListing from "./components/productlisting";
 import ProductDetails from "./pages/productdetails";
 import Login from "./pages/login";
-import Register from "./pages/register";
+
 import CartPage from "./pages/cart";
 import Verify from "./pages/verify";
 import ForgotPassword from "./pages/forgotpassword";
@@ -29,9 +29,11 @@ import LogoutPage from "./pages/myaccount/logoutpage";
 import Dashboard from "./pages/admin/Dashboard";
 import Products from "./pages/admin/products";
 import AddProduct from "./pages/admin/products/addproduct";
+import Register from "./pages/register";
 // (tu pourras ajouter plus tard : Products, Orders, Users, Settings, etc.)
 
 function App() {
+  const apiUrl = import.meta.env.VITE_API_URL;
   return (
     <BrowserRouter>
       <Routes>
@@ -41,7 +43,7 @@ function App() {
           <Route path="/productlisting" element={<ProductListing />} />
           <Route path="/product/:id" element={<ProductDetails />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+          <Route path="/register" element={<Register/>} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/verify" element={<Verify />} />
           <Route path="/forgotpassword" element={<ForgotPassword />} />

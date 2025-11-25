@@ -208,7 +208,7 @@ export async function loginUserController(request, response) {
             message : "La connexion faite avec succès",
             error: false,
             success : true,
-            date : {
+            data : {
                 accesstoken,
                 refreshToken
             }
@@ -223,7 +223,6 @@ export async function loginUserController(request, response) {
    }
     
 }
-
 
 export async function logoutController(request,response) {
     try {
