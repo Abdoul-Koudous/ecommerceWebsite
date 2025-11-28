@@ -12,7 +12,7 @@ const Verify = () => {
   const { openToast } = useContext(ToastContext);
   const navigate = useNavigate();
 
-  // 📌 Saisie OTP
+  // 📌 Gestion des inputs OTP
   const handleChange = (value, index) => {
     if (/^[0-9]?$/.test(value)) {
       const newOtp = [...otp];
@@ -25,29 +25,47 @@ const Verify = () => {
     }
   };
 
-  // 📌 Envoi OTP au backend
+  // 📌 Vérification OTP
   const handleSubmit = (e) => {
     e.preventDefault();
-    setLoading(true);
 
+    const actionType = localStorage.getItem("actionType");
+    const email = localStorage.getItem("userEmail");
     const code = otp.join("");
 
-    postData("/api/users/verifyEmail", {
-      email: localStorage.getItem("userEmail"),
-      otp: code
-    })
+    setLoading(true);
+
+    // 🔥 Cas : mot de passe oublié
+    if (actionType === "forgot-password") {
+      postData("/api/users/verify-forgot-password-otp", { email, otp: code })
+        .then((res) => {
+          if (res?.error === false) {
+            openToast("success", res?.message);
+
+            // 🔑 OTP validé → aller vers reset password
+            setTimeout(() => {
+              navigate("/resetpassword");
+            }, 800);
+          } else {
+            openToast("error", res?.message);
+          }
+        })
+        .finally(() => setLoading(false));
+
+      return;
+    }
+
+    // 🔥 Cas : vérification d'email normale (inscription)
+    postData("/api/users/verifyEmail", { email, otp: code })
       .then((res) => {
         if (res?.error === false) {
           openToast("success", res?.message);
-          localStorage.removeItem("userEmail");
-
-          // ⏳ délai léger avant redirection
+          localStorage.removeItem("userEmail"); // ici on supprime après inscription
           setTimeout(() => {
             navigate("/login");
           }, 800);
-
         } else {
-          openToast("error", res?.message || "Code OTP incorrect");
+          openToast("error", res?.message);
         }
       })
       .finally(() => setLoading(false));
@@ -55,7 +73,6 @@ const Verify = () => {
 
   return (
     <div className="verify-container">
-
       <div className="verify-box">
         <h2>Vérification OTP</h2>
 

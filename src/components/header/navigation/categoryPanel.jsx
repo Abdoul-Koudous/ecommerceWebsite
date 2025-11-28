@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { IoClose } from "react-icons/io5";
 import { FaPlus, FaMinus } from "react-icons/fa6";
 import { Link } from "react-router-dom"; // ✅ Ajout de Link
+import "./categorypanel.scss";
 
 const CategoryPanel = ({ isOpen, onClose }) => {
 

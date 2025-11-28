@@ -410,7 +410,13 @@ export async function updateUserDetails(request, response) {
             message: "L'utilisateur mis à jour avec succès",
             error: false,
             success: true,
-            user: updateUser
+            user: {
+                name: updateUser?.name,
+                _id: updateUser?._id,
+                email: updateUser?.email,
+                mobile: updateUser?.mobile,
+                avatar: updateUser?.avatar,
+            }
         });
 
     } catch (error) {
@@ -656,7 +662,7 @@ export async function UserDetails(request, response) {
 
         return response.json({
             message: "Les details de l'utilisateurs",
-            date: user,
+            data: user,
             error: false,
             success: true
         })

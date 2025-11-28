@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Navigate } from "react-router-dom";
 import {
   FaUser,
   FaBoxOpen,
@@ -13,6 +14,9 @@ import OrdersTabPage from "../orderstabpage";
 
 
 const MyAccount = () => {
+   // 🔒 PROTECTION D’ACCÈS
+  const token = localStorage.getItem("accesstoken");
+  if (!token) return <Navigate to="/login" replace />;
   const [activeTab, setActiveTab] = useState("profil");
   const [editMode, setEditMode] = useState(false);
 

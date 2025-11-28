@@ -12,12 +12,15 @@ import { postData } from "../utils/api";
 import { ToastContext } from "../../context/ToastContext";
 import { useNavigate } from "react-router-dom";
 import CircularProgress from "../../components/CircularProgress/CircularProgress";
+import { UserContext } from "../../UserContext/UserContext";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { loadUser } = useContext(UserContext);
+
 
   const { openToast } = useContext(ToastContext);
   const navigate = useNavigate();
@@ -39,6 +42,12 @@ const Login = () => {
           localStorage.setItem("accesstoken", res?.data?.accesstoken);
           localStorage.setItem("refreshToken", res?.data?.refreshToken);
           localStorage.setItem("userEmail", email);
+          setTimeout(() => {
+            loadUser();
+          }, 50);
+
+
+
 
           navigate("/"); // ou une autre page
         } else {
@@ -50,6 +59,35 @@ const Login = () => {
       })
       .finally(() => setLoading(false));
   };
+
+  const forgotPassword = () => {
+    if (email === "") {
+      openToast("error", "Veuillez s'il vous plaît entrer votre email");
+      return;
+    }
+
+    setLoading(true);
+
+    postData("/api/users/forgot-password", { email })
+      .then((res) => {
+        if (res?.success === true) {
+          openToast("success", res.message);
+
+          localStorage.setItem("userEmail", email);
+          localStorage.setItem("actionType", "forgot-password");
+
+          navigate("/verify");
+        } else {
+          openToast("error", res?.message || "Erreur inconnue");
+        }
+      })
+      .catch(() => {
+        openToast("error", "Erreur réseau");
+      })
+      .finally(() => setLoading(false));
+  };
+
+
 
   return (
     <div className="login-page">
@@ -101,7 +139,7 @@ const Login = () => {
               <input type="checkbox" />
               <span>Se souvenir de moi</span>
             </label>
-            <a href="#" className="forgot-link">
+            <a  className="forgot-link" onClick={forgotPassword}>
               Mot de passe oublié ?
             </a>
           </div>

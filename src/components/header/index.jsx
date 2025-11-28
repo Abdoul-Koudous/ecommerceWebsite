@@ -1,4 +1,4 @@
-import React, { useState } from 'react'; 
+import React, { useState,useContext } from 'react'; 
 import { Link, useNavigate } from 'react-router-dom';
 import Search from '../search';
 import Navigation from './navigation';
@@ -12,11 +12,15 @@ import {
   FaSignOutAlt,
 } from "react-icons/fa";
 import { fetchDataFromApi } from '../../pages/utils/api';
+import "./header.scss";
+import { UserContext } from '../../UserContext/UserContext';
 
 const Header = () => {
   const [cartOpen, setCartOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const navigate = useNavigate();
+  const { user } = useContext(UserContext);
+
 
    const cartItems = [
       { image: "/od11.jpg",name: "Produit 1", quantity: 2, price: 1500 },
@@ -33,7 +37,6 @@ const Header = () => {
   const toggleCart = () => setCartOpen(!cartOpen);
 
   const isLoggedIn = !!localStorage.getItem("accesstoken");
-  const userEmail = localStorage.getItem("userEmail") || "Utilisateur";
 
   const logout = async () => {
     try {
@@ -52,7 +55,7 @@ const Header = () => {
       console.error("Erreur lors de la déconnexion:", error);
     }
   }
-
+ 
   return (
     <header>
       <div className="top-strip">
@@ -90,13 +93,15 @@ const Header = () => {
                 <li className="user-menu">
                   <div className="user-info" onClick={() => setDropdownOpen(!dropdownOpen)}>
                     <img
-                      src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRCzK6DKnIE7MM_7cuaQAJlpxUHYs8yKDT3yg&s"
+                      src={user?.avatar || "/user.jpg"}
                       alt="User"
                       className="user-avatar"
                     />
+
                     <div className="user-details">
-                      <span className="user-name">{userEmail}</span>
-                      <span className="user-email">{userEmail}</span>
+                      <span className="user-name">{user?.name}</span>
+                      <span className="user-email">{user?.email}</span>
+
                     </div>
                   </div>
 

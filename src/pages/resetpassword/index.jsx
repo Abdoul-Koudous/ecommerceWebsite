@@ -1,47 +1,54 @@
-import React, { useState } from "react";
-import { FaLock, FaKey, FaCheckCircle, FaEye, FaEyeSlash, FaTimesCircle } from "react-icons/fa";
+import React, { useState, useContext } from "react";
+import { FaLock, FaKey, FaEye, FaEyeSlash } from "react-icons/fa";
 import "./resetpassword.scss";
+import { useNavigate } from "react-router-dom";
+import { ToastContext } from "../../context/ToastContext";
+import { postData } from "../utils/api";
+import CircularProgress from "../../components/CircularProgress/CircularProgress";
 
 const ResetPassword = () => {
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const navigate = useNavigate();
+  const { openToast } = useContext(ToastContext);
+
+  const [formFields, setFormFields] = useState({
+    email: localStorage.getItem("userEmail") || "",
+    newPassword: "",
+    confirmPassword: "",
+  });
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [showError, setShowError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormFields((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
-    if (newPassword !== confirmPassword) {
-      setErrorMessage("❌ Les mots de passe ne correspondent pas !");
-      setShowError(true);
-      setTimeout(() => setShowError(false), 3000);
-      return;
+    try {
+      const res = await postData("/api/users/reset-password", formFields);
+      console.log(res);
+
+      if (res?.success) {
+        openToast("success", res.message);
+        localStorage.removeItem("userEmail");
+        setTimeout(() => navigate("/login"), 800);
+      } else {
+        openToast("error", res.message || "Erreur lors de la réinitialisation");
+      }
+    } catch (err) {
+      console.error(err);
+      openToast("error", "Erreur serveur");
+    } finally {
+      setLoading(false);
     }
-
-    // Ici ton succès
-    setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 3000);
   };
 
   return (
     <div className="reset-page">
-      {showSuccess && (
-        <div className="popup-success">
-          <FaCheckCircle className="popup-icon" />
-          <span>Mot de passe réinitialisé avec succès !</span>
-        </div>
-      )}
-
-      {showError && (
-        <div className="popup-error">
-          <FaTimesCircle className="popup-icon" />
-          <span>{errorMessage}</span>
-        </div>
-      )}
-
       <div className="reset-card">
         <div className="reset-header">
           <FaKey className="reset-icon" />
@@ -52,14 +59,16 @@ const ResetPassword = () => {
         </div>
 
         <form className="reset-form" onSubmit={handleSubmit}>
+          {/* Nouveau mot de passe */}
           <div className="form-group">
             <FaLock className="input-icon" />
             <input
               type={showNewPassword ? "text" : "password"}
+              name="newPassword"
               placeholder=" "
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              required
+              value={formFields.newPassword}
+              onChange={handleChange}
+              disabled={loading}
             />
             <label>Nouveau mot de passe</label>
             <span
@@ -70,14 +79,16 @@ const ResetPassword = () => {
             </span>
           </div>
 
+          {/* Confirmation mot de passe */}
           <div className="form-group">
             <FaLock className="input-icon" />
             <input
               type={showConfirmPassword ? "text" : "password"}
+              name="confirmPassword"
               placeholder=" "
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
+              value={formFields.confirmPassword}
+              onChange={handleChange}
+              disabled={loading}
             />
             <label>Confirmer le mot de passe</label>
             <span
@@ -88,8 +99,8 @@ const ResetPassword = () => {
             </span>
           </div>
 
-          <button type="submit" className="btn-reset">
-            Réinitialiser
+          <button type="submit" className="btn-reset" disabled={loading}>
+            {loading ? <CircularProgress /> : "Réinitialiser"}
           </button>
         </form>
       </div>

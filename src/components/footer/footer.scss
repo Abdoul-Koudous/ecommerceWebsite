@@ -51,7 +51,7 @@
         flex-direction: column;
         gap: 10px;
 
-        input[type="email"] { padding: 8px; border-radius: 5px; border: none; }
+        input[type="email"] { padding: 8px; border-radius: 5px; border: 1px #e63946 solid; }
         .checkbox { display: flex; align-items: center; font-size: 0.85rem;
           input { margin-right: 5px; }
           label { color: #8d8a8a; }

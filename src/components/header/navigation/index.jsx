@@ -4,6 +4,7 @@ import { RiMenu2Fill } from "react-icons/ri";
 import { LiaAngleDownSolid } from "react-icons/lia";
 import { GoRocket } from "react-icons/go";
 import CategoryPanel from './categoryPanel';
+import "./navigation.scss";
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);

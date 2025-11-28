@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState,useContext } from 'react'; 
 import { NavLink, Outlet } from "react-router-dom";
 import {
   FaUser,
@@ -8,14 +8,11 @@ import {
   FaSignOutAlt,
 } from "react-icons/fa";
 import "./myaccount.scss";
+import { UserContext } from "../../UserContext/UserContext";
 
 const AccountLayout = () => {
-  const user = {
-    name: "John Doe",
-    email: "john@example.com",
-    avatar:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRCzK6DKnIE7MM_7cuaQAJlpxUHYs8yKDT3yg&s",
-  };
+  const { user } = useContext(UserContext);
+  
 
   const tabs = [
     { id: "profile", label: "Mon Profil", icon: <FaUser /> },
@@ -29,9 +26,14 @@ const AccountLayout = () => {
     <section className="account-layout">
       <aside className="sidebar">
         <div className="user-info">
-          <img src={user.avatar} alt="User" className="avatar" />
-          <h3>{user.name}</h3>
-          <p>{user.email}</p>
+          <img
+            src={user?.avatar || "/user.jpg"}
+            alt="User"
+            className="avatar"
+          />
+
+          <h3>{user?.name}</h3>
+          <p>{user?.email}</p>
         </div>
 
         <ul className="menu">

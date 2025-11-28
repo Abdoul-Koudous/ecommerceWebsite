@@ -30,10 +30,13 @@ import Dashboard from "./pages/admin/Dashboard";
 import Products from "./pages/admin/products";
 import AddProduct from "./pages/admin/products/addproduct";
 import Register from "./pages/register";
+import { useEffect } from "react";
+import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 // (tu pourras ajouter plus tard : Products, Orders, Users, Settings, etc.)
 
 function App() {
   const apiUrl = import.meta.env.VITE_API_URL;
+  
   return (
     <BrowserRouter>
       <Routes>
@@ -50,8 +53,15 @@ function App() {
           <Route path="/resetpassword" element={<ResetPassword />} />
           <Route path="/checkout" element={<Checkout />} />
 
-          {/* === COMPTE UTILISATEUR === */}
-          <Route path="/account" element={<AccountLayout />}>
+         {/* === COMPTE UTILISATEUR (PROTÉGÉ) === */}
+          <Route
+            path="/account"
+            element={
+              <ProtectedRoute>
+                <AccountLayout />
+              </ProtectedRoute>
+            }
+          >
             <Route index element={<Navigate to="profile" />} />
             <Route path="profile" element={<ProfilePage />} />
             <Route path="orders" element={<OrdersPage />} />
@@ -59,6 +69,7 @@ function App() {
             <Route path="settings" element={<SettingsPage />} />
             <Route path="logout" element={<LogoutPage />} />
           </Route>
+
         </Route>
 
         {/* === ADMIN === */}
@@ -72,6 +83,7 @@ function App() {
       </Routes>
     </BrowserRouter>
   );
+  
 }
 
 export default App;

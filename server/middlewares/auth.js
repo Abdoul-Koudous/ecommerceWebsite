@@ -3,12 +3,13 @@ import jwt from 'jsonwebtoken'
 
 const auth = async(request,response,next)=>{
     try {
-        const token = request.cookies.accessToken || request?.headers?.authorization?.split(" ")
-        [1];
+        const authHeader = request.headers?.authorization;
+        const token = request.cookies?.accessToken || (authHeader && authHeader.split(" ")[1]);
 
-        if(!token){
-            token = request.query.token;
-        }
+
+        // if(!token){
+        //     token = request.query.token;
+        // }
 
         if(!token){
             return response.status(401).json({
@@ -28,7 +29,7 @@ const auth = async(request,response,next)=>{
         next()
         
     } catch (error) {
-        return response.this.status(500).json({
+        return response.status(500).json({
             message : "Vous n'ête pas connecter",
             error : true,
             success : false

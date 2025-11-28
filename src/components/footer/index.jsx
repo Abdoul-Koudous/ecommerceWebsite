@@ -1,5 +1,6 @@
 import React from "react";
 import { FaShippingFast, FaUndoAlt, FaGift, FaHeadset, FaFacebookF, FaInstagram, FaTwitter, FaLinkedinIn } from "react-icons/fa";
+import "./footer.scss";
 
 const Footer = () => {
   return (
@@ -84,7 +85,7 @@ const Footer = () => {
         </div>
 
         <p className="footer-copy">
-          © {new Date().getFullYear()} <strong>YeboShop</strong> — Tous droits réservés.
+          © {new Date().getFullYear()} <strong>YebouShop</strong> — Tous droits réservés.
         </p>
 
         <div className="footer-payments">

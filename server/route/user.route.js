@@ -30,7 +30,7 @@ userRouter.delete('/deleteImage', auth, removeImageFromCloudinary);
 
 userRouter.post('/forgot-password', forgotPasswordController);
 userRouter.post('/verify-forgot-password-otp', verifyForgotPasswordOtp);
-userRouter.put('/reset-password', resetpassword);
+userRouter.post('/reset-password', resetpassword);
 userRouter.post('/refresh-token', refreshToken);
 userRouter.get('/user-details', auth, UserDetails);
 
