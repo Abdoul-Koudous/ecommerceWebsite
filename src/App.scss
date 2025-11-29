@@ -1,7 +1,4 @@
-@use "./components/header/header";
 @use "./components/search/search";
-@use "./components/header/navigation/navigation";
-@use "./components/header/navigation/categorypanel";
 @use "./components/homeslider/homeslider";
 @use "./components/homecatslider/homecatslider";
 @use "./pages/home/home";
@@ -10,7 +7,6 @@
 @use "./components/productitem/productitem";
 @use "./components/blogitem/blogitem.scss";
 @use "./components/blogslider.jsx/blogslider.scss";
-@use "./components/footer/footer";
 @use "./components/homesliderv2/homesliderv2";
 
 *{

@@ -542,7 +542,7 @@ export async function verifyForgotPasswordOtp(request, response) {
 
 export async function resetpassword(request, response) {
     try {
-        const { email, newPassword, confirmPassword } = request.body;
+        const { email,oldPassword, newPassword, confirmPassword } = request.body;
 
         if (!email || !newPassword || !confirmPassword) {
             return response.status(400).json({
@@ -565,6 +565,16 @@ export async function resetpassword(request, response) {
         if (user.otp !== null || user.otpExpires !== null) {
             return response.status(400).json({
                 message: "Veuillez d'abord vérifier votre OTP",
+                error: true,
+                success: false
+            });
+        }
+
+        const checkPassword = await bcryptjs.compare(oldPassword, user.password);
+        
+        if(!checkPassword){
+            return response.status(400).json({
+                message: "Votre ancien mot de passe est incorect",
                 error: true,
                 success: false
             });
